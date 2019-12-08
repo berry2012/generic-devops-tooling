@@ -1,0 +1,40 @@
+version: '2'
+services:
+  hub:
+    image: selenium/hub:3.3.1
+    ports: 
+      - "4444:4444"
+  chrome:
+    image: selenium/node-chrome:3.3.1
+    links: 
+      - hub
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+      HUB_PORT_4444_TCP_PORT: 4444
+      DBUS_SESSION_BUS_ADDRESS: /dev/null
+
+  firefox:
+    image: selenium/node-firefox:3.3.1
+    links:
+      - hub
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+      HUB_PORT_4444_TCP_PORT: 4444
+
+  phantomjs:
+    image: selenium/node-phantomjs:3.3.1
+    links:
+      - hub
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+      HUB_PORT_4444_TCP_PORT: 4444
+      PHANTOMJS_OPTS: "--ignore-ssl-errors=true"
+
+  b3-test:
+    build: .
+    volumes: 
+      - ./logs:/app/survey-tests/logs
+      - ./screenshots:/app/survey-tests/screenshots
+    environment:
+      - BTEST_DRIVER=REMOTE
+      - BTEST_REMOTE=http://hub:4444/wd/hub
