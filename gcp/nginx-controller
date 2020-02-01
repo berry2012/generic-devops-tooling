@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+export ZONE=<GCP_ZONE>
+export PROJECT_ID=<GCP_PROJECT_ID>
+export CLUSTERNAME=<name_of_cluster>
+
+gcloud config set project $PROJECT_ID
+gcloud config set compute/zone $ZONE
+gcloud container clusters create $CLUSTERNAME --num-nodes 2 & pid=$!
+wait $pid
+echo $pid completed
+# install helm
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+chmod 700 get_helm.sh
+./get_helm.sh
+helm init
+# install tiller
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'  
+# Now initialize Helm with your newly-created service account:
+helm init --service-account tiller --upgrade
+kubectl get deployments -n kube-system | grep tiller-deploy
+#Deploy an application in Kubernetes Engine 
+kubectl create deployment hello-app --image=gcr.io/google-samples/hello-app:1.0
+sleep 1m
+kubectl expose deployment hello-app  --port=8080
+sleep 1m
+# Deploying the NGINX Ingress Controller via Helm
+helm install --name nginx-ingress stable/nginx-ingress --set rbac.create=true
+touch ingress-resource.yaml
+cat > ingress-resource.yaml << _EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-resource
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello
+        backend:
+          serviceName: hello-app
+          servicePort: 8080
+_EOF
+kubectl apply -f ingress-resource.yaml 
+sleep 1m
+echo "deployment completed!"
