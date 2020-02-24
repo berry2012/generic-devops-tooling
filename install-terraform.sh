@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#install terraform on ubuntu
+sudo apt-get update
+sudo apt-get install jq -y
+
 function terraform-install() {
   [[ -f ${HOME}/bin/terraform ]] && echo "`${HOME}/bin/terraform version` already installed at ${HOME}/bin/terraform" && return 0
   OS=$(uname -s)
