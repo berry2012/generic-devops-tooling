@@ -1,0 +1,18 @@
+{
+    "account": "XXXXXXXXXXX",
+    "detailType": "CodePipeline Pipeline Execution State Change",
+    "region": "eu-west-1",
+    "source": "aws.codepipeline",
+    "time": "2022-02-21T09:04:28Z",
+    "notificationRuleArn": "arn:aws:codestar-notifications:eu-west-1:XXXXXXXXXXX:notificationrule/f134071110fcb59e1bda6bb822169b6f2fce5fcc",
+    "detail": {
+      "pipeline": "PIPELINE",
+      "execution-id": "51ac6389-0636-42c7-9e2d-26dbf63966a4",
+      "state": "SUCCEEDED",
+      "version": 2
+    },
+    "resources": [
+      "arn:aws:codepipeline:eu-west-1:XXXXXXXXXXX:PIPELINE"
+    ],
+    "additionalAttributes": {}
+  }
